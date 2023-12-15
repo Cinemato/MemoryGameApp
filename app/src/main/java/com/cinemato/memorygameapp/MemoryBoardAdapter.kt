@@ -8,20 +8,28 @@ import android.view.ViewGroup
 import android.view.ViewGroup.MarginLayoutParams
 import android.widget.ImageButton
 import androidx.cardview.widget.CardView
+import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.cinemato.memorygameapp.models.BoardSize
+import com.cinemato.memorygameapp.models.MemoryCard
 import kotlin.math.min
 
 class MemoryBoardAdapter(
     private val context: Context,
     private val boardSize: BoardSize,
-    private val cardImages: List<Int>
+    private val cards: List<MemoryCard>,
+    private val cardClickListener: CardClickListener
 ) :
     RecyclerView.Adapter<MemoryBoardAdapter.ViewHolder>() {
 
     companion object {
         private const val MARGIN_SIZE = 20
         private const val TAG = "MemoryBoardAdapter"
+    }
+
+    interface CardClickListener {
+        fun onCardClicked(position: Int)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
@@ -48,9 +56,20 @@ class MemoryBoardAdapter(
         private val imageButton = itemView.findViewById<ImageButton>(R.id.imageButton)
 
         fun bind(position: Int) {
-            imageButton.setImageResource(cardImages[position])
+            val memoryCard = cards[position]
+            imageButton.setImageResource(if (memoryCard.isOpen) memoryCard.identifier else R.drawable.ic_launcher_background)
+
+            if (memoryCard.isMatched) {
+                imageButton.alpha = 0.4f
+                ViewCompat.setBackgroundTintList(imageButton, ContextCompat.getColorStateList(context, R.color.color_gray))
+            } else {
+                imageButton.alpha = 1.0f
+                ViewCompat.setBackgroundTintList(imageButton, null)
+            }
+
             imageButton.setOnClickListener {
                 Log.i(TAG, "Clicked on position $position")
+                cardClickListener.onCardClicked(position)
             }
         }
     }
