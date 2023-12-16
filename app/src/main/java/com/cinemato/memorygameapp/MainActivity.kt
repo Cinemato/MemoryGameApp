@@ -1,9 +1,19 @@
 package com.cinemato.memorygameapp
 
+import android.animation.ArgbEvaluator
+import android.content.Context
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.text.Layout
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.widget.RadioGroup
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.cinemato.memorygameapp.models.BoardSize
@@ -32,6 +42,66 @@ class MainActivity : AppCompatActivity() {
         tvMoves = findViewById(R.id.tvMoves)
         tvPairs = findViewById(R.id.tvPairs)
 
+        setupBoard()
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_main, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.miRefresh -> {
+                if (memoryGame.getNumMoves() > 0 && !memoryGame.haveWonGame()) {
+                    showAlertDialog("Quit your current game?", null, View.OnClickListener {
+                        setupBoard()
+                    })
+                } else {
+                    setupBoard()
+                }
+            }
+            R.id.miSize -> {
+                showNewSizeDialog()
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun showNewSizeDialog() {
+        val boardSizeView = LayoutInflater.from(this).inflate(R.layout.dialog_board_size, null)
+        val radioGroupSize = boardSizeView.findViewById<RadioGroup>(R.id.radioGroup)
+        when (boardSize) {
+            BoardSize.EASY -> radioGroupSize.check(R.id.rbEasy)
+            BoardSize.MEDIUM -> radioGroupSize.check(R.id.rbMedium)
+            BoardSize.HARD -> radioGroupSize.check(R.id.rbHard)
+        }
+        showAlertDialog("Choose new size", boardSizeView, View.OnClickListener {
+            boardSize = when (radioGroupSize.checkedRadioButtonId) {
+                R.id.rbEasy -> BoardSize.EASY
+                R.id.rbMedium -> BoardSize.MEDIUM
+                else -> {BoardSize.HARD}
+            }
+
+            setupBoard()
+        })
+    }
+
+    private fun showAlertDialog(title: String, view: View?, positiveClickListener: View.OnClickListener) {
+        AlertDialog.Builder(this)
+            .setTitle(title)
+            .setView(view)
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("OK") {_, _ ->
+                positiveClickListener.onClick(null)
+            }.show()
+    }
+
+    private fun setupBoard() {
+        tvMoves.text = "Moves: 0"
+        tvPairs.text = "Pairs: 0 / ${boardSize.getNumPairs()}"
+        tvPairs.setTextColor(ContextCompat.getColor(this, R.color.color_progress_none))
+
         memoryGame = MemoryGame(boardSize)
 
         adapter = MemoryBoardAdapter(this, boardSize, memoryGame.cards, object: MemoryBoardAdapter.CardClickListener {
@@ -54,7 +124,23 @@ class MainActivity : AppCompatActivity() {
             Snackbar.make(clRoot, "Invalid move!", Snackbar.LENGTH_LONG).show()
             return
         }
-        memoryGame.flipCard(position)
+
+        if (memoryGame.flipCard(position)) {
+            tvPairs.text = "Pairs: ${memoryGame.numPairsFound} / ${boardSize.getNumPairs()}"
+            val color = ArgbEvaluator().evaluate(
+                memoryGame.numPairsFound.toFloat() / boardSize.getNumPairs(),
+                ContextCompat.getColor(this, R.color.color_progress_none),
+                ContextCompat.getColor(this, R.color.color_progress_full)
+            ) as Int
+            tvPairs.setTextColor(color)
+
+            if (memoryGame.haveWonGame()) {
+                Snackbar.make(clRoot, "You won! Congratulations.", Snackbar.LENGTH_LONG).show()
+            }
+        }
+
+        tvMoves.text = "Moves: ${memoryGame.getNumMoves()}"
+
         adapter.notifyDataSetChanged()
     }
 }

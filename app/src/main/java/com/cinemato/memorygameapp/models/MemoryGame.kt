@@ -8,6 +8,7 @@ class MemoryGame(private val boardSize: BoardSize) {
     var numPairsFound = 0
 
     private var indexOfSingleSelectedCard: Int? = null
+    private var numCardFlips = 0
 
     init {
         val chosenImages = DEFAULT_ICONS.shuffled().take(boardSize.getNumPairs())
@@ -30,6 +31,8 @@ class MemoryGame(private val boardSize: BoardSize) {
         }
 
         card.isOpen = !card.isOpen
+        numCardFlips++
+
         return foundMatch
     }
 
@@ -54,5 +57,9 @@ class MemoryGame(private val boardSize: BoardSize) {
 
     fun haveWonGame(): Boolean {
         return numPairsFound == boardSize.getNumPairs()
+    }
+
+    fun getNumMoves(): Int {
+        return numCardFlips / 2
     }
 }
