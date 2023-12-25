@@ -2,6 +2,7 @@ package com.cinemato.memorygameapp
 
 import android.animation.ArgbEvaluator
 import android.content.Context
+import android.content.Intent
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.text.Layout
@@ -20,9 +21,16 @@ import com.cinemato.memorygameapp.models.BoardSize
 import com.cinemato.memorygameapp.models.MemoryCard
 import com.cinemato.memorygameapp.models.MemoryGame
 import com.cinemato.memorygameapp.utils.DEFAULT_ICONS
+import com.cinemato.memorygameapp.utils.EXTRA_BOARD_SIZE
 import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
+
+    companion object {
+        private const val TAG = "MainActivity"
+        private const val CREATE_REQUEST_CODE = 351
+    }
+
     private lateinit var clRoot: ConstraintLayout
     private lateinit var rvBoard: RecyclerView
     private lateinit var tvMoves: TextView
@@ -41,6 +49,10 @@ class MainActivity : AppCompatActivity() {
         rvBoard = findViewById(R.id.rvBoard)
         tvMoves = findViewById(R.id.tvMoves)
         tvPairs = findViewById(R.id.tvPairs)
+
+        val intent = Intent(this, CreateActivity::class.java)
+        intent.putExtra(EXTRA_BOARD_SIZE, BoardSize.MEDIUM)
+        startActivity(intent)
 
         setupBoard()
     }
@@ -63,9 +75,30 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.miSize -> {
                 showNewSizeDialog()
+                return true
+            }
+            R.id.miCustom -> {
+                showCreationDialog()
+                return true
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    private fun showCreationDialog() {
+        val boardSizeView = LayoutInflater.from(this).inflate(R.layout.dialog_board_size, null)
+        val radioGroupSize = boardSizeView.findViewById<RadioGroup>(R.id.radioGroup)
+        showAlertDialog("Create your own memory board", boardSizeView, View.OnClickListener {
+            val desiredBoardSize = when (radioGroupSize.checkedRadioButtonId) {
+                R.id.rbEasy -> BoardSize.EASY
+                R.id.rbMedium -> BoardSize.MEDIUM
+                else -> {BoardSize.HARD}
+            }
+
+            val intent = Intent(this, CreateActivity::class.java)
+            intent.putExtra(EXTRA_BOARD_SIZE, desiredBoardSize)
+            startActivityForResult(intent, CREATE_REQUEST_CODE)
+        })
     }
 
     private fun showNewSizeDialog() {

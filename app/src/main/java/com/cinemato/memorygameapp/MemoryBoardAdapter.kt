@@ -57,7 +57,7 @@ class MemoryBoardAdapter(
 
         fun bind(position: Int) {
             val memoryCard = cards[position]
-            imageButton.setImageResource(if (memoryCard.isOpen) memoryCard.identifier else R.drawable.ic_launcher_background)
+            imageButton.setImageResource(if (memoryCard.isOpen) memoryCard.identifier else R.drawable.ic_question)
 
             if (memoryCard.isMatched) {
                 imageButton.alpha = 0.4f
