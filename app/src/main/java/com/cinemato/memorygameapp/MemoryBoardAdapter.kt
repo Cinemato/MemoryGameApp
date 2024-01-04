@@ -13,6 +13,7 @@ import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.RecyclerView
 import com.cinemato.memorygameapp.models.BoardSize
 import com.cinemato.memorygameapp.models.MemoryCard
+import com.squareup.picasso.Picasso
 import kotlin.math.min
 
 class MemoryBoardAdapter(
@@ -57,7 +58,16 @@ class MemoryBoardAdapter(
 
         fun bind(position: Int) {
             val memoryCard = cards[position]
-            imageButton.setImageResource(if (memoryCard.isOpen) memoryCard.identifier else R.drawable.ic_question)
+
+            if (memoryCard.isOpen) {
+                if (memoryCard.imageUrl != null) {
+                    Picasso.get().load(memoryCard.imageUrl).placeholder(R.drawable.ic_loading).into(imageButton)
+                } else {
+                    imageButton.setImageResource(memoryCard.identifier)
+                }
+            } else {
+                imageButton.setImageResource(R.drawable.ic_question)
+            }
 
             if (memoryCard.isMatched) {
                 imageButton.alpha = 0.4f

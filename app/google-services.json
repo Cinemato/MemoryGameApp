@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "26196360613",
+    "project_id": "memorygame-72b50",
+    "storage_bucket": "memorygame-72b50.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:26196360613:android:a6e80dc62f7709041dfc4c",
+        "android_client_info": {
+          "package_name": "com.cinemato.memorygameapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDtHdZMl9qPcb1GIDPkm8fyIL8mPCC9Olk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
